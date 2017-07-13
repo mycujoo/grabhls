@@ -1,0 +1,20 @@
+env:
+  es6: true
+  node: true
+extends: 'standard'
+rules:
+  indent:
+    - error
+    - 2
+  linebreak-style:
+    - error
+    - unix
+  arrow-parens:
+    - error
+    - always
+  comma-dangle:
+    - 1
+    - always-multiline
+  operator-linebreak:
+    - error
+    - before
