@@ -9,12 +9,14 @@ const raise = clierr.raise
 const errors = clierr.errors
 
 define('NOBUCKET', 'No S3 bucket specified')
+define('INVALIDSTORAGECLASS', 'Invalid storage class provided to module options')
+
+const STORAGE_CLASSES = ['STANDARD', 'STANDARD_IA', 'REDUCED_REDUNDANCY']
 
 class S3UploadModule extends AbstractUploadModule {
   constructor (options) {
     super(options)
     this.name = 'S3UploadModule'
-    process.exit(1)
   }
 
   getStream () {
@@ -22,11 +24,17 @@ class S3UploadModule extends AbstractUploadModule {
       raise(errors.NOBUCKET)
     }
 
+    const storageClass = this.moduleOptions.storage_class || 'REDUCED_REDUNDANCY'
+
+    if (STORAGE_CLASSES.indexOf(storageClass) === -1) {
+      raise(errors.INVALIDSTORAGECLASS)
+    }
+
     const stream = s3Stream.upload({
       Bucket: this.moduleOptions.bucket,
       Key: this.options.output,
-      ACL: this.options.acl || 'public-read',
-      StorageClass: this.moduleOptions.storage_class || 'REDUCED_REDUNDANCY',
+      ACL: this.moduleOptions.acl || 'private',
+      StorageClass: storageClass,
       ContentType: this.moduleOptions.content_type || 'video/mp4',
     })
 

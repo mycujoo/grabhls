@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "description": "Grabs a m3u8 for a given Mycujoo event id and uploads the resulting video to S3",
   "main": "index.js",
+  "repository": "https://github.com/mycujoo/grabhls.git",
   "dependencies": {
     "args": "^3.0.2",
     "aws-sdk": "^2.82.0",
+    "chai": "^4.1.0",
     "cli-error": "^0.5.7",
     "cuid": "^1.3.8",
     "dotenv": "^4.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "lodash": "^4.17.4",
+    "mocha": "^3.4.2",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",
     "s3-upload-stream": "^1.0.7",
@@ -28,12 +31,12 @@
     "node": "7.10"
   },
   "bin": {
-    "hls2s3": "index.js"
+    "grabhls": "index.js"
   },
   "scripts": {
-    "test": "echo \"test\"",
+    "test": "./node_modules/mocha/bin/mocha",
     "build": "npm link"
   },
-  "author": "",
+  "author": "Mycujoo.tv",
   "license": "ISC"
 }

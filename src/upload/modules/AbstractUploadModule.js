@@ -21,10 +21,6 @@ class AbstractUploadModule {
       raise(errors.NOOUTPUT)
     }
 
-    if (_.isEmpty(options.source)) {
-      raise(errors.NOSRC)
-    }
-
     this.name = this.constructor.name
     this.options = options
     this.moduleOptions = this.getModuleOptions()
@@ -49,10 +45,6 @@ class AbstractUploadModule {
 
   getName () {
     return this.constructor.name
-  }
-
-  getSrc () {
-    return this.options.source
   }
 }
 

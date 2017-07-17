@@ -1,7 +1,9 @@
 FROM mhart/alpine-node:7.8
-WORKDIR /src
+WORKDIR /srv
 ADD . .
 
 RUN apk add ffmpeg  curl curl-dev --update
 
-ENTRYPOINT ["index.js"]
+RUN npm install && npm link
+
+ENTRYPOINT ["grabhls"]

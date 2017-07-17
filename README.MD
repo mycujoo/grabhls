@@ -33,7 +33,8 @@ Create a .env file for AWS credentials (or specify them in your .bashrc or .zshr
 ```
 # Access to AWS S3
 AWS_ACCESS_KEY_ID=AKIAXXXXX
-AWS_SECRET_ACCESS_KEY=
+AWS_SECRET_ACCESS_KEY=XXXXXX
+
 ```
 
 ## Contributing

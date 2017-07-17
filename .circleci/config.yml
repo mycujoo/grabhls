@@ -1,0 +1,54 @@
+---
+defaults: &defaults
+  working_directory: /tmp/build
+  environment:
+    IMAGE_NAME: hls-grabber
+    DOCKER_IMAGE: mycujoo/hls-grabber
+    VERSION: 0.1
+
+version: 2
+jobs:
+  build_node_test:
+    <<: *defaults
+    docker:
+      - image: circleci/node:7.10
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: Install packages
+          command: npm install --silent
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - .node_modules
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - build
+
+  build_container:
+    <<: *defaults
+    docker:      
+      - image: mycujoo/gcloud-docker:latest
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - setup_remote_docker
+      - run:
+          name: Build docker container
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker build -t ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM} .
+            docker tag ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM} ${DOCKER_IMAGE}:latest
+            docker push ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM}
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build_node_test
+      - build_container:
+          requires:
+            - build_node_test
