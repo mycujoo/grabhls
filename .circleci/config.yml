@@ -2,7 +2,7 @@
 defaults: &defaults
   working_directory: /tmp/build
   environment:
-    DOCKER_IMAGE: mycujoo/hls-grabber
+    DOCKER_IMAGE: mycujoo/grabhls
     VERSION: 0.1
 
 version: 2

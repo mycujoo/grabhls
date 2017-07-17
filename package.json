@@ -1,5 +1,5 @@
 {
-  "name": "hls-grabber",
+  "name": "grabhls",
   "version": "1.0.0",
   "description": "Grabs a m3u8 for a given Mycujoo event id and uploads the resulting video to S3",
   "main": "index.js",

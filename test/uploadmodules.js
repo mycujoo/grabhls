@@ -5,7 +5,7 @@ const LocalFileModule = require('../src/upload/modules/LocalFileModule')
 
 describe('Upload modules', () => {
   describe('s3', () => {
-    it('should return writable stream', () => {
+    it('should return writeable stream', () => {
       const options = {
         uploadModuleOptions: [
           'acl=public-read',
