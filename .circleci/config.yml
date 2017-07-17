@@ -2,7 +2,6 @@
 defaults: &defaults
   working_directory: /tmp/build
   environment:
-    IMAGE_NAME: hls-grabber
     DOCKER_IMAGE: mycujoo/hls-grabber
     VERSION: 0.1
 
@@ -30,7 +29,7 @@ jobs:
 
   build_container:
     <<: *defaults
-    docker:      
+    docker:
       - image: mycujoo/gcloud-docker:latest
     steps:
       - attach_workspace:
