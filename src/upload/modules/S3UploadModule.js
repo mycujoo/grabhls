@@ -24,7 +24,7 @@ class S3UploadModule extends AbstractUploadModule {
       raise(errors.NOBUCKET)
     }
 
-    const storageClass = this.moduleOptions.storage_class || 'REDUCED_REDUNDANCY'
+    const storageClass = this.moduleOptions.storage_class || 'STANDARD_IA'
 
     if (STORAGE_CLASSES.indexOf(storageClass) === -1) {
       raise(errors.INVALIDSTORAGECLASS)
@@ -38,7 +38,11 @@ class S3UploadModule extends AbstractUploadModule {
       ContentType: this.moduleOptions.content_type || 'video/mp4',
     })
 
-    stream.maxPartSize(this.moduleOptions.max_part_size || 20971520)
+    stream
+      .maxPartSize(this.moduleOptions.max_part_size || 20971520)
+      .on('uploaded', () => {
+        console.log(`Uploaded ${this.options.tempFile} => ${this.options.output} using ${this.options.uploadModule.getName()}`)
+      })
 
     return stream
   }

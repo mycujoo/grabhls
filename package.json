@@ -17,6 +17,8 @@
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",
     "s3-upload-stream": "^1.0.7",
+    "tempfile": "^2.0.0",
+    "tempy": "^0.1.0",
     "which": "^1.2.14"
   },
   "devDependencies": {

@@ -5,6 +5,7 @@ const errors = clierr.errors
 const ffmpeg = require('fluent-ffmpeg')
 const _ = require('lodash')
 const events = require('events')
+const fs = require('fs')
 
 define('INVALIDoutput', 'Invalid M3U8 output')
 define('NOOUTPUT', 'No video output given')
@@ -16,13 +17,22 @@ class Video {
     this.options = options
     this.retries = 0
     events.EventEmitter.prototype._maxListeners = this.options.retryCount * 10
-    this.output = ffmpeg(this.options.source)
+    this.output = ffmpeg(this.options.source).inputOptions(['-loglevel fatal'])
   }
 
   convert () {
-    this.output
-      .audioCodec('copy')
-      .videoCodec('copy')
+    // todo support transcoding mode
+    if (this.options.copy === true) {
+      this.output
+        .audioCodec('copy')
+        .videoCodec('copy')
+    } else {
+      this.output
+        .audioCodec('aac')
+        .videoCodec('libx264')
+        .audioBitrate('128k')
+        .videoBitrate('3000k', true)
+    }
 
     // check if we need to create a chunk of the video
     if (this.options.startTime !== null) {
@@ -37,17 +47,33 @@ class Video {
       raise(errors.NOSRC)
     }
 
+    if (this.options.copy === true && this.options.tempFile !== null) {
+      this.output.outputOptions(['-movflags +faststart'])
+    } else if (this.options.copy === true && this.options.tempFile === null) {
+      this.output.outputOptions([
+        '-movflags separate_moof+faststart+empty_moov+frag_keyframe',
+        '-bsf:a aac_adtstoasc',
+      ])
+    } else if (this.options.copy === false) {
+      this.output.outputOptions([
+        '-movflags +empty_moov+frag_keyframe+faststart',
+        '-preset medium',
+      ])
+    }
+
     // @todo fix fluent-ffmpeg memory leak when retry happens
 
+    if (this.options.tempFile === null) {
+      this.output.output(this.options.uploadModule.getStream())
+    }
+
     this.output
-      .outputOptions([
-        '-bsf:a aac_adtstoasc',
-        '-movflags frag_keyframe+empty_moov',
-      ])
       .format('mp4')
-      .output(this.options.uploadModule.getStream())
       .on('start', (commandLine) => {
-        console.log(`Spawned FFmpeg with command: ${commandLine}`)
+        console.log(`ffmpeg spawned: ${commandLine}`)
+      })
+      .on('stderr', (stderrLine) => {
+        console.log('stderr: ' + stderrLine)
       })
       .on('error', (err) => {
         console.error(`An error occurred: ${err.message}`)
@@ -65,14 +91,27 @@ class Video {
         }
       })
       .on('end', () => {
-        console.log(`Processing finished! Written ${this.options.output} using ${this.options.uploadModule.getName()}`)
+        console.log(`Processing finished!`)
+
+        if (this.options.tempFile !== null) {
+          console.log(`Uploading temporary file ${this.options.tempFile}`)
+
+          const tempFileStream = fs.createReadStream(this.options.tempFile)
+          tempFileStream.pipe(this.options.uploadModule.getStream())
+        } else {
+          console.log(`Written ${this.options.output} using ${this.options.uploadModule.getName()}`)
+        }
       })
 
     this.run()
   }
 
-  run (output) {
-    this.output.run()
+  run () {
+    if (this.options.tempFile !== null) {
+      this.output.save(this.options.tempFile)
+    } else {
+      this.output.run()
+    }
   }
 
   getOptions () {

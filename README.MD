@@ -26,6 +26,12 @@ $ npm install -g grabhls
 
 ## Usage
 
+To generate a cuid for the output filename you can add {random} to the -o/--output option:
+
+-o some-filename-{random}.mp4 => some-filename-cj5c5veaf0000q0ygcogqwl4a.mp4
+
+
+
 ### Uploading to S3
 
 Create a .env file for AWS credentials (or specify them in your .bashrc or .zshrc)
@@ -35,6 +41,55 @@ Create a .env file for AWS credentials (or specify them in your .bashrc or .zshr
 AWS_ACCESS_KEY_ID=AKIAXXXXX
 AWS_SECRET_ACCESS_KEY=XXXXXX
 
+```
+
+#### Module options
+
+| Option        | Effect                              | Default value | Value                                         |
+|---------------|-------------------------------------|---------------|-----------------------------------------------|
+| bucket        | Specifies the destination s3 bucket | none          | string                                        |
+| acl           | null                                | private       | No                                            |
+| storage_class | Specifies the storage class         | STANDARD_IA   | STANDARD or STANDARD_IA or REDUCED_REDUNDANCY |
+| content_type  | Specifies the content type          | video/mp4     | string                                        |
+
+```
+# Grab an HLS source and output it directly to an S3 bucket
+$ grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket
+```
+
+#### Compatibility issues with playback
+
+Outputting to a stream requires the output to be seekable, a stream is not seekable so ffmpeg would normally throw an error.
+To circumvent this we add additional flags that tell ffmpeg to generate a fragmented file. This can cause playback problems in players like Quicktime.
+
+You can prevent playback errors by using the temporary file method by adding the -t/--temp-file option.
+
+```
+$ grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket -t
+```
+
+This will first write the video to a temporary file before piping the resulting video to a stream.
+
+### Auto retry mechanism
+
+Grabhls allows you to automatically retry retrieving the remote file by adding the -a/--auto-retry option
+
+```
+$ grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket -a
+```
+
+The following additonal options are availableOptions
+
+-r, --retry-count <n>    Maximum amount of retries (defaults to 5)
+-R, --retry-timeout <n>  Retry timeout (in seconds) (defaults to 30)
+
+### Creating clips
+
+You can create a clip using the -S/start-time and -d/--duration flags:
+
+```
+# Creates a 30 second clip starting at the 30 second mark
+$ grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket -S 30 -d 30
 ```
 
 ## Contributing
