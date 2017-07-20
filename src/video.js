@@ -48,7 +48,7 @@ class Video {
     }
 
     if (this.options.copy === true && this.options.tempFile !== null) {
-      this.output.outputOptions(['-movflags +faststart'])
+      this.output.outputOptions(['-movflags +faststart', '-bsf:a aac_adtstoasc'])
     } else if (this.options.copy === true && this.options.tempFile === null) {
       this.output.outputOptions([
         '-movflags separate_moof+faststart+empty_moov+frag_keyframe',
