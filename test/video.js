@@ -74,6 +74,8 @@ const expects = [
     1,
     '-movflags',
     '+faststart',
+    '-bsf:a',
+    'aac_adtstoasc',
     '-f',
     'mp4',
   ],
