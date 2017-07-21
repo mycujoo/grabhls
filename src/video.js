@@ -17,7 +17,7 @@ class Video {
     this.options = options
     this.retries = 0
     events.EventEmitter.prototype._maxListeners = this.options.retryCount * 10
-    this.output = ffmpeg(this.options.source).inputOptions(['-loglevel fatal'])
+    this.output = ffmpeg(this.options.source).inputOptions(['-loglevel error'])
   }
 
   convert () {
