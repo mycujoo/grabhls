@@ -31,7 +31,7 @@ const options = [
 const expects = [
   [
     '-loglevel',
-    'fatal',
+    'error',
     '-ss',
     1,
     '-i',
@@ -61,7 +61,7 @@ const expects = [
   ],
   [
     '-loglevel',
-    'fatal',
+    'error',
     '-ss',
     1,
     '-i',
