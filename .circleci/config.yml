@@ -48,8 +48,6 @@ jobs:
           command: |
             if [[ "${CIRCLE_BRANCH}" = "master" ]]; then
               docker tag ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM} ${DOCKER_IMAGE}:latest
-            else
-              docker tag ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM}
             fi
             docker push ${DOCKER_IMAGE}
 
