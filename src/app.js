@@ -5,6 +5,10 @@ const _ = require('lodash')
 const cuid = require('cuid')
 const S3UploadModule = require('./upload/modules/S3UploadModule')
 const LocalFileModule = require('./upload/modules/LocalFileModule')
+const which = require('which')
+const { execFileSync } = require('child_process')
+const nodeCleanup = require('node-cleanup')
+const logger = require('./lib/logger')
 
 const define = clierr.define
 const raise = clierr.raise
@@ -13,6 +17,7 @@ const errors = clierr.errors
 require('dotenv').load({ silent: false })
 
 define('FFMPEGNOTFOUND', 'Cannot find ffmpeg executable on this system')
+define('FFPROBENOTFOUND', 'Cannot find ffprobe executable on this system')
 define('INVALIDSRC', 'Source is not a valid m3u8 url')
 define('INVALIDOUTPUT', 'Output file path is not valid')
 define('UNKNOWNMODULE', 'Unknown output module')
@@ -48,9 +53,6 @@ args
 const flags = args.parse(process.argv)
 
 try {
-  if (/^(http|https.*\.m3u8.*)$/.test(flags.source) !== true) {
-    raise(errors.INVALIDSRC)
-  }
 
   if (_.isEmpty(flags.output)) {
     raise(errors.INVALIDOUTPUT)
@@ -71,12 +73,12 @@ try {
   }
 
   if (options.tempFile !== null) {
-    console.log(`Using temporary file: ${options.tempFile}`)
+    logger.info(`Using temporary file: ${options.tempFile}`)
   }
 
-  console.log(`Using source: ${options.source}`)
-  console.log(`Output: ${options.output}`)
-  console.log(`Upload module: ${flags.module}`)
+  logger.info(`Using source: ${options.source}`)
+  logger.info(`Output: ${options.output}`)
+  logger.info(`Upload module: ${flags.module}`)
 
   if (!_.isEmpty(flags.moduleOptions)) {
     options.uploadModuleOptions = Array.isArray(flags.moduleOptions)
@@ -94,15 +96,54 @@ try {
     raise(errors.UNKNOWNMODULE)
   }
 
+  const ffprobeBin = which.sync('ffprobe', {nothrow: true})
+
+  if (!ffprobeBin) {
+      raise(errors.FFPROBENOTFOUND)
+  }
+
+  // probe the video prior to grabbing
+  execFileSync(ffprobeBin, ['-loglevel', 'error', '-i', options.source, '-rw_timeout', '2000000'])
+
   const video = new Video(options)
   video.convert()
+
+  nodeCleanup((exitCode, signal) => {
+    if (signal) {
+      logger.info('Forced exit detected, attempting clean shutdown')
+      video.getOutput().kill('SIGTERM')
+      // attempt to finish the upload before shutdown
+      if (module === 's3') {
+        if (options.tempFile !== null) {
+          video.localUpload()
+        }
+        logger.info('Waiting for upload to finish to s3...')
+        options.uploadModule.getUpload().then((result) => {
+          logger.info('FINISHED')
+          logger.info(JSON.stringify(result))
+          process.kill(process.pid, signal)
+          nodeCleanup.uninstall()
+        })
+      } else {
+        process.kill(process.pid, signal)
+        nodeCleanup.uninstall()
+      }
+
+      return false
+    }
+  })
+
 } catch (e) {
   if (typeof e.error === 'function') {
     e.error()
     args.showHelp()
     e.exit()
   } else {
-    console.error(e)
+    if (e.stack) {
+        process.stderr.write(e.stack)
+    } else {
+        logger.error(e)
+    }
     args.showHelp()
     process.exit(1)
   }
