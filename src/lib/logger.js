@@ -9,16 +9,12 @@ const {
   combine,
   timestamp,
   printf,
-  label,
 } = format
 const env = process.env.NODE_ENV || 'production'
-const os = require('os')
-
 const winstonTransports = []
-const hostname = os.hostname
 
 const customFormat = printf((info) => {
-  return `${info.timestamp} [${info.label}] ${info.level}: ${info.message}`
+  return `${info.timestamp} ${info.level}: ${info.message}`
 })
 
 switch (env) {
@@ -34,9 +30,6 @@ case 'test':
         format: combine(
           timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
-          }),
-          label({
-            label: hostname,
           }),
           customFormat
         ),
@@ -56,9 +49,6 @@ case 'production':
           timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
           }),
-          label({
-            label: hostname,
-          }),
           customFormat
         ),
         handleExceptions: true,
@@ -75,9 +65,6 @@ default:
         format: combine(
           timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
-          }),
-          label({
-            label: hostname,
           }),
           customFormat
         ),
