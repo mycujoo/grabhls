@@ -6,6 +6,8 @@ const ffmpeg = require('fluent-ffmpeg')
 const _ = require('lodash')
 const events = require('events')
 const fs = require('fs')
+const logger = require('./lib/logger')
+const S3UploadModule = require('./upload/modules/S3UploadModule')
 
 define('INVALIDoutput', 'Invalid M3U8 output')
 define('NOOUTPUT', 'No video output given')
@@ -62,21 +64,29 @@ class Video {
     }
 
     // @todo fix fluent-ffmpeg memory leak when retry happens
+    const uploadStream = this.options.uploadModule.getStream()
 
     if (this.options.tempFile === null) {
-      this.output.output(this.options.uploadModule.getStream())
+      this.output.output(uploadStream)
     }
 
     this.output
       .format('mp4')
       .on('start', (commandLine) => {
-        console.log(`ffmpeg spawned: ${commandLine}`)
+        logger.info(`ffmpeg spawned: ${commandLine}`)
       })
       .on('stderr', (stderrLine) => {
-        console.log('stderr: ' + stderrLine)
+        logger.info('stderr: ' + stderrLine)
       })
       .on('error', (err) => {
-        console.error(`An error occurred: ${err.message}`)
+        const errMessage = err.message || 'Unkown error'
+
+        if (errMessage.includes('255')) {
+          logger.info('Ffmpeg process ended by SIGTERM')
+          return
+        }
+
+        logger.error(`An error occurred: ${errMessage}`)
 
         if (this.options.autoRetry === true) {
           if (this.retries === this.options.retryCount) {
@@ -86,24 +96,34 @@ class Video {
             setTimeout(() => {
               this.run()
             }, parseInt(this.options.retryTimeout) * 1000)
-            console.log(`Auto retry  attempt ${this.retries}/${this.options.retryCount}`)
+            logger.info(`Auto retry  attempt ${this.retries}/${this.options.retryCount}`)
           }
         }
       })
       .on('end', () => {
-        console.log(`Processing finished!`)
+        logger.info(`Processing finished!`)
 
-        if (this.options.tempFile !== null) {
-          console.log(`Uploading temporary file ${this.options.tempFile}`)
-
-          const tempFileStream = fs.createReadStream(this.options.tempFile)
-          tempFileStream.pipe(this.options.uploadModule.getStream())
+        if (this.options.uploadModule instanceof S3UploadModule) {
+          if (this.options.tempFile !== null) {
+            this.localUpload()
+          }
+          logger.info('FFmpeg stream closing, request to complete has been sent')
+          this.options.uploadModule.getUpload().then((result) => {
+            logger.info(JSON.stringify(result))
+          })
         } else {
-          console.log(`Written ${this.options.output} using ${this.options.uploadModule.getName()}`)
+          logger.info(`Written ${this.options.output} using ${this.options.uploadModule.getName()}`)
         }
       })
 
     this.run()
+  }
+
+  localUpload () {
+    logger.info(`Uploading temporary file ${this.options.tempFile}`)
+
+    const tempFileStream = fs.createReadStream(this.options.tempFile)
+    tempFileStream.pipe(this.options.uploadModule.getStream())
   }
 
   run () {

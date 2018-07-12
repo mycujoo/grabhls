@@ -1,12 +1,12 @@
 const AbstractUploadModule = require('./AbstractUploadModule')
-const AWS = require('aws-sdk')
-const s3Stream = require('s3-upload-stream')(new AWS.S3())
+const S3 = require('aws-sdk/clients/s3')
 const _ = require('lodash')
-// const cuid = require('cuid')
+const stream = require('stream')
 const clierr = require('cli-error')
 const define = clierr.define
 const raise = clierr.raise
 const errors = clierr.errors
+const s3 = new S3()
 
 define('NOBUCKET', 'No S3 bucket specified')
 define('INVALIDSTORAGECLASS', 'Invalid storage class provided to module options')
@@ -30,21 +30,23 @@ class S3UploadModule extends AbstractUploadModule {
       raise(errors.INVALIDSTORAGECLASS)
     }
 
-    const stream = s3Stream.upload({
+    const pass = new stream.PassThrough()
+    this.upload = s3.upload({
       Bucket: this.moduleOptions.bucket,
       Key: this.options.output,
       ACL: this.moduleOptions.acl || 'private',
       StorageClass: storageClass,
       ContentType: this.moduleOptions.content_type || 'video/mp4',
-    })
+      Body: pass,
+    }, {
+      partSize: this.moduleOptions.max_part_size || 20971520,
+    }).promise()
 
-    stream
-      .maxPartSize(this.moduleOptions.max_part_size || 20971520)
-      .on('uploaded', () => {
-        console.log(`Uploaded ${this.options.tempFile} => ${this.options.output} using ${this.options.uploadModule.getName()}`)
-      })
+    return pass
+  }
 
-    return stream
+  getUpload () {
+    return this.upload
   }
 }
 

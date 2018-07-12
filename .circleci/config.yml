@@ -46,7 +46,9 @@ jobs:
       - run:
           name: Tag & push docker container
           command: |
-            docker tag ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM} ${DOCKER_IMAGE}:latest
+            if [[ "${CIRCLE_BRANCH}" = "master" ]]; then
+              docker tag ${DOCKER_IMAGE}:${VERSION}.${CIRCLE_BUILD_NUM} ${DOCKER_IMAGE}:latest
+            fi
             docker push ${DOCKER_IMAGE}
 
 workflows:
