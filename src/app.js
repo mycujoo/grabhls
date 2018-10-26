@@ -5,6 +5,7 @@ const _ = require('lodash')
 const cuid = require('cuid')
 const S3UploadModule = require('./upload/modules/S3UploadModule')
 const LocalFileModule = require('./upload/modules/LocalFileModule')
+const GCSUploadModule = require('./upload/modules/GCSUploadModule')
 const which = require('which')
 const { execFileSync } = require('child_process')
 const nodeCleanup = require('node-cleanup')
@@ -92,6 +93,8 @@ try {
     options.uploadModule = new S3UploadModule(options)
   } else if (module === 'local') {
     options.uploadModule = new LocalFileModule(options)
+  } else if (module === 'gcs') {
+    options.uploadModule = new GCSUploadModule(options)
   } else {
     raise(errors.UNKNOWNMODULE)
   }
@@ -113,11 +116,11 @@ try {
       logger.info('Forced exit detected, attempting clean shutdown')
       video.getOutput().kill('SIGTERM')
       // attempt to finish the upload before shutdown
-      if (module === 's3') {
+      if (module === 's3' || module === 'gcs') {
         if (options.tempFile !== null) {
           video.localUpload()
         }
-        logger.info('Waiting for upload to finish to s3...')
+        logger.info(`Waiting for upload to finish to ${module}...`)
         options.uploadModule.getUpload().then((result) => {
           logger.info('FINISHED')
           logger.info(JSON.stringify(result))
