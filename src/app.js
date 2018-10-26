@@ -54,7 +54,6 @@ args
 const flags = args.parse(process.argv)
 
 try {
-
   if (_.isEmpty(flags.output)) {
     raise(errors.INVALIDOUTPUT)
   }
@@ -102,7 +101,7 @@ try {
   const ffprobeBin = which.sync('ffprobe', {nothrow: true})
 
   if (!ffprobeBin) {
-      raise(errors.FFPROBENOTFOUND)
+    raise(errors.FFPROBENOTFOUND)
   }
 
   // probe the video prior to grabbing
@@ -135,7 +134,6 @@ try {
       return false
     }
   })
-
 } catch (e) {
   if (typeof e.error === 'function') {
     e.error()
@@ -143,9 +141,9 @@ try {
     e.exit()
   } else {
     if (e.stack) {
-        process.stderr.write(e.stack)
+      process.stderr.write(e.stack)
     } else {
-        logger.error(e)
+      logger.error(e)
     }
     args.showHelp()
     process.exit(1)
