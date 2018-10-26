@@ -30,6 +30,21 @@ To generate a cuid for the output filename you can add {random} to the -o/--outp
 
 -o some-filename-{random}.mp4 => some-filename-cj5c5veaf0000q0ygcogqwl4a.mp4
 
+### Uploading to GCS
+
+Configure your `.env` to have a `GOOGLE_CLOUD_PROJECT_ID` much like the `.env.sample`.
+
+You also should be authenticated, and you can do that with `gcloud auth application-default login`.
+
+#### Module Options
+
+| Option        | Effect                              | Default value | Value                                         |
+|---------------|-------------------------------------|---------------|-----------------------------------------------|
+| bucket        | Specifies the destination gcs bucket | none          | string                                        |
+| acl           | Changes permission for accessing the file                                | private       | [List here](https://cloud.google.com/storage/docs/access-control/lists#predefined-acl)                                            |
+| gzip | Enables or disables gzip compression         | true   | Boolean |
+| validation | Uses a file validation method | false | false, md5, crc32c |
+| content_type  | Specifies the content type          | video/mp4     | string                                        |
 
 
 ### Uploading to S3
