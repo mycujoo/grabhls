@@ -5,6 +5,7 @@ const _ = require('lodash')
 const cuid = require('cuid')
 const S3UploadModule = require('./upload/modules/S3UploadModule')
 const LocalFileModule = require('./upload/modules/LocalFileModule')
+const GCSUploadModule = require('./upload/modules/GCSUploadModule')
 const which = require('which')
 const { execFileSync } = require('child_process')
 const nodeCleanup = require('node-cleanup')
@@ -53,7 +54,6 @@ args
 const flags = args.parse(process.argv)
 
 try {
-
   if (_.isEmpty(flags.output)) {
     raise(errors.INVALIDOUTPUT)
   }
@@ -92,6 +92,8 @@ try {
     options.uploadModule = new S3UploadModule(options)
   } else if (module === 'local') {
     options.uploadModule = new LocalFileModule(options)
+  } else if (module === 'gcs') {
+    options.uploadModule = new GCSUploadModule(options)
   } else {
     raise(errors.UNKNOWNMODULE)
   }
@@ -99,7 +101,7 @@ try {
   const ffprobeBin = which.sync('ffprobe', {nothrow: true})
 
   if (!ffprobeBin) {
-      raise(errors.FFPROBENOTFOUND)
+    raise(errors.FFPROBENOTFOUND)
   }
 
   // probe the video prior to grabbing
@@ -113,11 +115,11 @@ try {
       logger.info('Forced exit detected, attempting clean shutdown')
       video.getOutput().kill('SIGTERM')
       // attempt to finish the upload before shutdown
-      if (module === 's3') {
+      if (module === 's3' || module === 'gcs') {
         if (options.tempFile !== null) {
           video.localUpload()
         }
-        logger.info('Waiting for upload to finish to s3...')
+        logger.info(`Waiting for upload to finish to ${module}...`)
         options.uploadModule.getUpload().then((result) => {
           logger.info('FINISHED')
           logger.info(JSON.stringify(result))
@@ -132,7 +134,6 @@ try {
       return false
     }
   })
-
 } catch (e) {
   if (typeof e.error === 'function') {
     e.error()
@@ -140,9 +141,9 @@ try {
     e.exit()
   } else {
     if (e.stack) {
-        process.stderr.write(e.stack)
+      process.stderr.write(e.stack)
     } else {
-        logger.error(e)
+      logger.error(e)
     }
     args.showHelp()
     process.exit(1)

@@ -8,6 +8,7 @@ const events = require('events')
 const fs = require('fs')
 const logger = require('./lib/logger')
 const S3UploadModule = require('./upload/modules/S3UploadModule')
+const GCSUploadModule = require('./upload/modules/GCSUploadModule')
 
 define('INVALIDoutput', 'Invalid M3U8 output')
 define('NOOUTPUT', 'No video output given')
@@ -103,7 +104,8 @@ class Video {
       .on('end', () => {
         logger.info(`Processing finished!`)
 
-        if (this.options.uploadModule instanceof S3UploadModule) {
+        if (this.options.uploadModule instanceof S3UploadModule
+          || this.options.uploadModule instanceof GCSUploadModule) {
           if (this.options.tempFile !== null) {
             this.localUpload()
           }
