@@ -3,6 +3,8 @@ const S3 = require('aws-sdk/clients/s3')
 const _ = require('lodash')
 const stream = require('stream')
 const clierr = require('cli-error')
+const { triggerHook } = require('./../../lib/webhook')
+
 const define = clierr.define
 const raise = clierr.raise
 const errors = clierr.errors
@@ -41,6 +43,25 @@ class S3UploadModule extends AbstractUploadModule {
     }, {
       partSize: this.moduleOptions.max_part_size || 20971520,
     }).promise()
+      .then(() => {
+        if (this.webhookOptions.success) {
+          triggerHook(this.webhookOptions.success, this.webhookOptions.method, {
+            outputPath: `${this.moduleOptions.bucket}/${this.options.output}`,
+            ...this.webhookOptions,
+          })
+        }
+      })
+      .catch((err) => {
+        if (this.webhookOptions.fail) {
+          triggerHook(this.options.webhookOptions.fail, this.webhookOptions.method, {
+            bucket: this.moduleOptions.bucket,
+            output: this.options.output,
+            errStack: err,
+          })
+        }
+
+        throw new Error(err)
+      })
 
     return pass
   }
