@@ -35,6 +35,7 @@ args
   .option('temp-file', 'Upload using a temporary file instead of a direct stream upload', false, Boolean)
   .option('retry-count', 'Maximum amount of retries', 5)
   .option('retry-timeout', 'Retry timeout (in seconds)', 30)
+  .option('webhook-options', 'Webhook specific options')
   .examples([
     {
       usage: 'grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket',
@@ -70,6 +71,7 @@ try {
     retryCount: flags.retryCount,
     retryTimeout: flags.retryTimeout,
     tempFile: (flags.tempFile ? require('tempy').file({ extension: '.mp4' }) : null),
+    webhookOptions: [],
   }
 
   if (options.tempFile !== null) {
@@ -84,6 +86,12 @@ try {
     options.uploadModuleOptions = Array.isArray(flags.moduleOptions)
       ? [ ...flags.moduleOptions ]
       : [ flags.moduleOptions ]
+  }
+
+  if (!_.isEmpty(flags.webhookOptions)) {
+    options.webhookOptions = Array.isArray(flags.webhookOptions)
+      ? [ ...flags.webhookOptions ]
+      : [ flags.webhookOptions ]
   }
 
   const module = flags.module.toLowerCase()

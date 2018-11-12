@@ -40,7 +40,7 @@ describe('Upload modules', () => {
     it('should return proper module options', () => {
       const module = new S3UploadModule(options.s3)
 
-      const moduleOptions = module.getModuleOptions()
+      const moduleOptions = module.getDetailedOptions('uploadModuleOptions')
 
       expect(moduleOptions.acl).to.equal('public-read')
       expect(moduleOptions.bucket).to.equal('test')
@@ -56,7 +56,7 @@ describe('Upload modules', () => {
     it('should return proper module options', () => {
       const module = new GCSUploadModule(options.gcs)
 
-      const moduleOptions = module.getModuleOptions()
+      const moduleOptions = module.getDetailedOptions('uploadModuleOptions')
 
       expect(moduleOptions.acl).to.equal('publicRead')
       expect(moduleOptions.bucket).to.equal('test')
