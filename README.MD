@@ -107,5 +107,25 @@ You can create a clip using the -S/start-time and -d/--duration flags:
 $ grabhls  -s http://localhost/live/test.m3u8 -o testing/{random}-file.mp4 -M bucket=testbucket -S 30 -d 30
 ```
 
+### Webhook Options
+
+You can send data to another server if the output succeeds or fails.
+This is controlled by the flag `--webhook-options` or `-w`.
+
+Available flags:
+
+| Option    | Effect                              |
+|-----------|-------------------------------------|
+| success   | Endpoint in success cases           |
+| fail      | Endpoint in failure cases           |
+| method    | Http method to be used in requests  |
+
+Also, you may send additional flags to be sent along in the payload.
+
+```
+# Sends to GCS and triggers a POST on localhost /success with payload and random_data=123
+$ grabhls -s /path/to/my/playlist.m3u8 -o some_output.mp4 -m gcs -M bucket=my-secret-bucket -w success=http://localhost:8000/success -w method=POST -w random_data=123
+```
+
 ## Contributing
 Todo

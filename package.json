@@ -14,6 +14,7 @@
     "dotenv": "^4.0.0",
     "fast-crc32c": "^1.0.4",
     "fluent-ffmpeg": "^2.1.2",
+    "got": "^9.3.0",
     "lodash": "^4.17.11",
     "mocha": "^5.2.0",
     "node-cleanup": "^2.1.2",
@@ -33,7 +34,7 @@
     "eslint-plugin-standard": "^3.0.0"
   },
   "engines": {
-    "node": "7.10"
+    "node": "10.13"
   },
   "bin": {
     "grabhls": "index.js"

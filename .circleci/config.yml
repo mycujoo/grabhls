@@ -10,7 +10,7 @@ jobs:
   build_node_test:
     <<: *defaults
     docker:
-      - image: circleci/node:7.10
+      - image: circleci/node:10.13
     steps:
       - checkout
       - restore_cache:

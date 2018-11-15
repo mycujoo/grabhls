@@ -10,6 +10,7 @@ define('NOGETSTREAM', 'No getStream method defined')
 define('NOOUTPUT', 'No output file name specified')
 define('NOABSTRACT', 'Can\'t instantiate abstract class!')
 define('INVALIDMODULEOPTS', 'Invalid module options specified (key=value)')
+define('INVALIDWEBHOOKOPTS', 'Invalid webhook options specified (key=value)')
 
 class AbstractUploadModule {
   constructor (options) {
@@ -23,16 +24,21 @@ class AbstractUploadModule {
 
     this.name = this.constructor.name
     this.options = options
-    this.moduleOptions = this.getModuleOptions()
+    this.moduleOptions = this.getDetailedOptions('uploadModuleOptions')
+    this.webhookOptions = this.webhookOptions ? this.getDetailedOptions('webhookOptions') : []
   }
 
-  getModuleOptions () {
-    return this.options.uploadModuleOptions.reduce((acc, current, idx) => {
+  getDetailedOptions (type) {
+    const error = type === 'uploadModuleOptions'
+      ? errors.INVALIDMODULEOPTS
+      : errors.INVALIDWEBHOOKOPTS
+
+    return this.options[type].reduce((acc, current, idx) => {
       if (/\w+=\w+/.test(current)) {
         const option = current.split('=')
         acc[option[0]] = option[1]
       } else {
-        raise(errors.INVALIDMODULEOPTS)
+        raise(error)
       }
 
       return acc

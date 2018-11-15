@@ -3,6 +3,8 @@ const { Storage } = require('@google-cloud/storage')
 const _ = require('lodash')
 const stream = require('stream')
 const clierr = require('cli-error')
+const { triggerHook } = require('./../../lib/webhook')
+
 const define = clierr.define
 const raise = clierr.raise
 const errors = clierr.errors
@@ -47,9 +49,24 @@ class GCSUploadModule extends AbstractUploadModule {
         },
       }))
       .on('error', (error) => {
+        if (this.webhookOptions.fail) {
+          triggerHook(this.options.webhookOptions.fail, this.webhookOptions.method, {
+            bucket: this.moduleOptions.bucket,
+            output: this.options.output,
+            errStack: error,
+          })
+        }
+
         reject(error)
       })
       .on('finish', () => {
+        if (this.webhookOptions.success) {
+          triggerHook(this.webhookOptions.success, this.webhookOptions.method, {
+            outputPath: `${this.moduleOptions.bucket}/${this.options.output}`,
+            ...this.webhookOptions,
+          })
+        }
+
         resolve(`Closing stream for ${this.options.output}`)
       })
     })
