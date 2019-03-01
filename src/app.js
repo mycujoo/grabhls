@@ -17,6 +17,11 @@ const errors = clierr.errors
 
 require('dotenv').load({ silent: false })
 
+process.on('uncaughtException', function (exception) {
+  process.stderr.write(exception.stack)
+  process.exit(1)
+})
+
 define('FFMPEGNOTFOUND', 'Cannot find ffmpeg executable on this system')
 define('FFPROBENOTFOUND', 'Cannot find ffprobe executable on this system')
 define('INVALIDSRC', 'Source is not a valid m3u8 url')
