@@ -113,6 +113,11 @@ class Video {
           this.options.uploadModule.getUpload().then((result) => {
             logger.info(JSON.stringify(result))
           })
+            .catch((err) => {
+              console.dir(err)
+
+              raise(err)
+            })
         } else {
           logger.info(`Written ${this.options.output} using ${this.options.uploadModule.getName()}`)
         }

@@ -139,6 +139,7 @@ try {
           process.kill(process.pid, signal)
           nodeCleanup.uninstall()
         })
+        .catch((err) => console.dir(err))
       } else {
         process.kill(process.pid, signal)
         nodeCleanup.uninstall()
