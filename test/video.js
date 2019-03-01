@@ -32,6 +32,8 @@ const expects = [
   [
     '-loglevel',
     'error',
+    '-protocol_whitelist',
+    'file,http,https,tcp,tls',
     '-ss',
     1,
     '-i',
@@ -62,6 +64,8 @@ const expects = [
   [
     '-loglevel',
     'error',
+    '-protocol_whitelist',
+    'file,http,https,tcp,tls',
     '-ss',
     1,
     '-i',
