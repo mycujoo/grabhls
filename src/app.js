@@ -113,7 +113,7 @@ try {
   }
 
   // probe the video prior to grabbing
-  execFileSync(ffprobeBin, ['-loglevel', 'error', '-i', options.source, '-rw_timeout', '2000000'])
+  execFileSync(ffprobeBin, ['-loglevel', 'error', '-i', options.source, '-rw_timeout', '2000000', '-protocol_whitelist', 'file,http,https,tcp,tls'])
 
   const video = new Video(options)
   video.convert()
