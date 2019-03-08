@@ -14,6 +14,7 @@ define('INVALIDoutput', 'Invalid M3U8 output')
 define('NOOUTPUT', 'No video output given')
 define('NOSRC', 'No source given')
 define('retryCount', 'Maximum retry count reached')
+define('UPLOADFAILED', 'Failed to upload')
 
 class Video {
   constructor (options) {
@@ -116,7 +117,7 @@ class Video {
             .catch((err) => {
               console.dir(err)
 
-              raise(err)
+              raise(errors.UPLOADFAILED)
             })
         } else {
           logger.info(`Written ${this.options.output} using ${this.options.uploadModule.getName()}`)

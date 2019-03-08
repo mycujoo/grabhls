@@ -99,6 +99,10 @@ try {
       : [ flags.webhookOptions ]
   }
 
+  if (options.uploadModuleOptions != null) {
+    logger.info(`Module Options: ${options.uploadModuleOptions}`)
+  }
+
   const module = flags.module.toLowerCase()
 
   if (module === 's3') {
