@@ -4,6 +4,7 @@ const _ = require('lodash')
 const stream = require('stream')
 const clierr = require('cli-error')
 const { triggerHook } = require('./../../lib/webhook')
+const logger = require('../../lib/logger')
 
 const define = clierr.define
 const raise = clierr.raise
@@ -13,6 +14,7 @@ const storage = new Storage({
 })
 
 define('NOBUCKET', 'No GCS bucket specified')
+define('UPLOADFAILED', 'Upload failed')
 
 class GCSUploadModule extends AbstractUploadModule {
   constructor (options) {
@@ -27,13 +29,17 @@ class GCSUploadModule extends AbstractUploadModule {
 
     const bucket = storage.bucket(this.moduleOptions.bucket)
 
-    const bucketExists = bucket.exists()
-      .then((exists) => exists)
-      .catch((err) => raise(err))
+    bucket.exists()
+      .then(([ exists ]) => {
+        if (!exists) {
+          throw errors.NOBUCKET
+        }
+      })
+      .catch((err) => {
+        logger.error(err)
 
-    if (bucketExists[0]) {
-      raise(errors.NOBUCKET)
-    }
+        process.exit(1)
+      })
 
     const file = bucket.file(this.options.output)
 
@@ -69,6 +75,10 @@ class GCSUploadModule extends AbstractUploadModule {
 
         resolve(`Closing stream for ${this.options.output}`)
       })
+    }).catch((err) => {
+      logger.error(err)
+
+      process.exit(1)
     })
 
     return pass

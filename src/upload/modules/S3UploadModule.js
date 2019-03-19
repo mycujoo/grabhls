@@ -4,6 +4,7 @@ const _ = require('lodash')
 const stream = require('stream')
 const clierr = require('cli-error')
 const { triggerHook } = require('./../../lib/webhook')
+const logger = require('../../lib/logger')
 
 const define = clierr.define
 const raise = clierr.raise
@@ -12,6 +13,7 @@ const s3 = new S3()
 
 define('NOBUCKET', 'No S3 bucket specified')
 define('INVALIDSTORAGECLASS', 'Invalid storage class provided to module options')
+define('UPLOADFAILED', 'Upload failed')
 
 const STORAGE_CLASSES = ['STANDARD', 'STANDARD_IA', 'REDUCED_REDUNDANCY']
 
@@ -60,7 +62,9 @@ class S3UploadModule extends AbstractUploadModule {
           })
         }
 
-        throw new Error(err)
+        logger.error(err)
+
+        process.exit(1)
       })
 
     return pass
