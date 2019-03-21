@@ -1,6 +1,9 @@
 # grabhls - Small utility to save an HLS VOD straight to external (or local storage)
 ---------------------------------------
 
+[![CircleCI](https://circleci.com/gh/mycujoo/grabhls.svg?style=svg)](https://circleci.com/gh/mycujoo/grabhls)
+[![codecov](https://codecov.io/gh/mycujoo/grabhls/branch/master/graph/badge.svg)](https://codecov.io/gh/mycujoo/grabhls)
+
 ## Features
 
 * Stream a HLS VOD straight to Amazon S3
