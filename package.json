@@ -26,6 +26,7 @@
     "winston": "^3.0.0-rc3"
   },
   "devDependencies": {
+    "codecov": "^3.2.0",
     "eslint": "^3.16.1",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.14.0",
@@ -38,6 +39,7 @@
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
+    "codecov": "codecov",
     "build": "npm link"
   },
   "author": "Mycujoo.tv",

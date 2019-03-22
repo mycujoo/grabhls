@@ -21,6 +21,12 @@ jobs:
       - run:
           name: Run tests
           command: npm run test
+      - run:
+          name: Run code coverage
+          command: |
+            sudo npm install -g codecov
+            sudo npm install -g istanbul
+            NODE_ENV=test istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && codecov
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
