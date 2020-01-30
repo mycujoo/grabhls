@@ -25,7 +25,7 @@ class AbstractUploadModule {
     this.name = this.constructor.name
     this.options = options
     this.moduleOptions = this.getDetailedOptions('uploadModuleOptions')
-    this.webhookOptions = this.webhookOptions ? this.getDetailedOptions('webhookOptions') : []
+    this.webhookOptions = options.webhookOptions ? this.getDetailedOptions('webhookOptions') : []
   }
 
   getDetailedOptions (type) {
