@@ -15,7 +15,7 @@
     "fast-crc32c": "^1.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "got": "^9.3.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "mocha": "^5.2.0",
     "node-cleanup": "^2.1.2",
     "request": "^2.88.0",
