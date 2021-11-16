@@ -7,7 +7,7 @@
   "dependencies": {
     "@google-cloud/storage": "^2.1.0",
     "args": "^3.0.2",
-    "aws-sdk": "^2.267.1",
+    "aws-sdk": "^2.814.0",
     "chai": "^4.1.0",
     "cli-error": "^0.5.7",
     "cuid": "^1.3.8",
